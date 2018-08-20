@@ -1,0 +1,19 @@
+.toolbar {
+    justify-content: space-between;
+}
+
+body {
+    min-height: 600px;
+}
+
+a.active {
+    color: #ffe600;
+}
+
+.grey {
+    background: rgba(128, 128, 128, 1);
+}
+
+.mat-form-field-label {
+    color: black;
+}

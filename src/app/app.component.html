@@ -1,0 +1,56 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<mat-toolbar color="warn" class="grey">
+  <mat-toolbar-row class="toolbar">
+    <!-- <img src='https://jnj.brightspotcdn.com/resource/theme/jnj/images/logo-site-white-header-animated-med.22180f8ca16ad33fd51a4b8f78d4120d.gif' height="40" /> -->
+    <img src='assets/images/ey_logo_293x300.svg' height="60%" />
+    <span>CT Recruiting Information</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-sidenav-container fullscreen style="top: 64px; left: 8px; right: 8px;">
+  <mat-sidenav mode="side" opened>
+    <mat-toolbar>
+      <mat-toolbar-row>
+        <span>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            <mat-icon fontSet="fas" fontIcon="fa-home"></mat-icon>
+          </a>
+        </span>
+      </mat-toolbar-row>
+
+      <mat-toolbar-row>
+        <span>
+          <a routerLink="/content" routerLinkActive="active">
+            <mat-icon fontSet="fas" fontIcon="fa-book"></mat-icon>
+          </a>
+        </span>
+      </mat-toolbar-row>
+
+      <mat-toolbar-row>
+        <span>
+          <a routerLink="/dashboard" routerLinkActive="active">
+            <mat-icon fontSet="fas" fontIcon="fa-chart-bar"></mat-icon>
+          </a>
+        </span>
+      </mat-toolbar-row>
+
+      <mat-toolbar-row>
+        <span>
+          <a routerLink="/summary" routerLinkActive="active">
+            <mat-icon fontSet="fas" fontIcon="fa-cubes"></mat-icon>
+          </a>
+        </span>
+      </mat-toolbar-row>
+
+      <mat-toolbar-row>
+        <span>
+          <a routerLink="/excelUpload" routerLinkActive="active">
+            <mat-icon fontSet="fas" fontIcon="fa-calculator"></mat-icon>
+          </a>
+        </span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

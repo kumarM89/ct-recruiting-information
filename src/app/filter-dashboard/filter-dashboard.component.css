@@ -1,0 +1,28 @@
+table {
+  width: 100%;
+}
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+
+.mat-form-field {
+  font-size: 14px;
+  width: 15%;
+  margin: 10px;
+}
+
+.mat-progress-spinner circle, .mat-spinner circle {
+    stroke: #ffe600;
+}
+
+#dvDataReported {
+  float: right;
+  padding-top: 10px;
+}
+
+#btnExport {
+  margin-left: 10px;
+  float: right;
+  background: #7f7f80;
+}
