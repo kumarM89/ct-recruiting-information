@@ -1,0 +1,40 @@
+table {
+    width: 100%;
+  }
+  
+  th.mat-sort-header-sorted {
+    color: black;
+  }
+  
+  .mat-form-field {
+    font-size: 14px;
+    width: 15%;
+    margin: 10px;
+  }
+  
+  .mat-progress-spinner circle, .mat-spinner circle {
+      stroke: #ffe600;
+  }
+  
+  #dvTop {
+    float: right;
+  }
+  
+  #dvDataReported {
+    padding-top: 10px;
+    margin-left: 10px;
+  }
+  
+  #btnExport {
+    background: #7f7f80;
+    margin-left: 10px;
+  }
+  
+  tr.mat-footer-row, tr.mat-header-row {
+    font-weight: bold;
+    background: #f5f5f5;
+  }
+  
+  .mat-table-sticky {
+    border-top: 1px solid #e0e0e0;
+  }

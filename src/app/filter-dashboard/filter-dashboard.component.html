@@ -1,57 +1,76 @@
 <mat-card>
   <mat-spinner style="margin:0 auto;" *ngIf="!isLoadingResultsDone"></mat-spinner>
   <div *ngIf="isLoadingResultsDone">
-    <button id="btnExport" mat-raised-button color="primary" (click)="exportAsExcel($event.target)">Export as Excel</button>
-    <div id="dvDataReported">Data as of {{dateReported | date: 'MMM d, y'}}</div>
-    <mat-form-field>
-      <input matInput (keyup)="applyFilter($event.target)" placeholder="Name" name="name" [(ngModel)]="filters.name">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput (keyup)="applyFilter($event.target)" placeholder="Rank" name="rank" [(ngModel)]="filters.rank">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput (keyup)="applyFilter($event.target)" placeholder="Location" name="location" [(ngModel)]="filters.location">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput (keyup)="applyFilter($event.target)" placeholder="Alignment" name="alignment" [(ngModel)]="filters.alignment">
-    </mat-form-field>
-    <div class="mat-elevation-z8 " #TABLE>
+    <div id="dvTop">
+      <a routerLink="/summary">
+        <mat-icon fontSet="fas" fontIcon="fa-cubes"></mat-icon>
+      </a>
+      <span id="dvDataReported">Data as of {{dateReported | date: 'MMM d, y'}}</span>
+      <button id="btnExport" mat-raised-button color="primary" (click)="exportAsExcel($event.target)">Export as Excel</button>
+    </div>
+    <div *ngFor="let filter of filters">
+      <mat-form-field>
+        <input matInput (keyup)="applyFilter($event.target)" placeholder="Name" name="name" [(ngModel)]="filter.name">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput (keyup)="applyFilter($event.target)" placeholder="Rank" name="rank" [(ngModel)]="filter.rank">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput (keyup)="applyFilter($event.target)" placeholder="Location" name="location" [(ngModel)]="filter.location">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput (keyup)="applyFilter($event.target)" placeholder="Alignment" name="alignment" [(ngModel)]="filter.alignment">
+      </mat-form-field>
+    </div>
+    <div class="mat-elevation-z8" #TABLE>
       <table mat-table #table [dataSource]="dataSource" matSort>
         <!-- S.No. Column -->
         <ng-container matColumnDef="serial">
           <th mat-header-cell *matHeaderCellDef> S.No. </th>
           <td mat-cell *matCellDef="let element = index"> {{element + 1}} </td>
+          <td mat-footer-cell *matFooterCellDef> Total </td>
         </ng-container>
 
         <!-- Name Column -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
           <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+          <td mat-footer-cell *matFooterCellDef> </td>
+        </ng-container>
+
+        <!-- Rank Group Column -->
+        <ng-container matColumnDef="rankgroup">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Rank Group </th>
+          <td mat-cell *matCellDef="let element"> {{element.rankgroup}} </td>
+          <td mat-footer-cell *matFooterCellDef> </td>
         </ng-container>
 
         <!-- Rank Column -->
         <ng-container matColumnDef="rank">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Rank </th>
           <td mat-cell *matCellDef="let element"> {{element.rank}} </td>
+          <td mat-footer-cell *matFooterCellDef> </td>
         </ng-container>
 
         <!-- Location Column -->
         <ng-container matColumnDef="location">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Location </th>
           <td mat-cell *matCellDef="let element"> {{element.location}} </td>
+          <td mat-footer-cell *matFooterCellDef> </td>
         </ng-container>
 
         <!-- Alignment Column -->
         <ng-container matColumnDef="alignment">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Alignment </th>
           <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+          <td mat-footer-cell *matFooterCellDef> </td>
         </ng-container>
 
         <!-- Actual Utilization Column -->
         <ng-container matColumnDef="actualUtil">
           <th mat-header-cell *matHeaderCellDef>
-            <div style="padding-right: 5px;">Previous </div>
-            <mat-form-field style="width: 40px">
+            <span style="padding-right: 5px;">Previous </span>
+            <mat-form-field style="width: 40px; margin: 0;">
               <mat-select [(value)]="selectedActual">
                 <mat-option *ngFor="let index of actualUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
               </mat-select>
@@ -59,13 +78,14 @@
             <div>wk Average Utilization</div>
           </th>
           <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActual] | number: '.1-2'}} % </td>
+          <td mat-footer-cell *matFooterCellDef> {{getActualUtil() | number: '.1-2'}} % </td>
         </ng-container>
 
         <!-- Projected Utilization Column -->
         <ng-container matColumnDef="projUtil">
           <th mat-header-cell *matHeaderCellDef>
-            <div style="padding-right: 5px;">Forecasted </div>
-            <mat-form-field style="width: 40px">
+            <span style="padding-right: 5px;">Forecasted </span>
+            <mat-form-field style="width: 40px; margin: 0;">
               <mat-select [(value)]="selectedProj">
                 <mat-option *ngFor="let index of projectedUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
               </mat-select>
@@ -73,16 +93,19 @@
             <div>wk Average Utilization</div>
           </th>
           <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProj] | number: '.1-2'}} % </td>
+          <td mat-footer-cell *matFooterCellDef> {{getProjUtil() | number: '.1-2'}} % </td>
         </ng-container>
 
         <!-- Last Week Full Utilization Column -->
         <ng-container matColumnDef="fullUtil">
           <th mat-header-cell *matHeaderCellDef> Last Week Full Utilization </th>
           <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
+          <td mat-footer-cell *matFooterCellDef> {{getFullUtil() | number: '.1-2'}} % </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
       </table>
     </div>
   </div>

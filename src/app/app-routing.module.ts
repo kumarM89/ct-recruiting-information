@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { SiteContentComponent } from './site-content/site-content.component';
 import { ExcelUploadComponent } from './excel-upload/excel-upload.component';
 import { FilterDashboardComponent } from './filter-dashboard/filter-dashboard.component';
+import { SummaryComponent } from './summary/summary.component';
 
 const routes: Routes = [{
   path: 'content', component: SiteContentComponent
@@ -10,6 +11,8 @@ const routes: Routes = [{
   path: 'dashboard', component: FilterDashboardComponent
 }, {
   path: 'excelUpload', component: ExcelUploadComponent
+}, {
+  path: 'summary', component: SummaryComponent
 }];
 
 @NgModule({

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { Router } from '@angular/router';
 import { sp } from '@pnp/sp';
 import * as XLSX from 'xlsx';
 
@@ -38,7 +39,7 @@ export class FilterDashboardComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('TABLE') table: ElementRef;
 
-  constructor() {
+  constructor(private router: Router) {
     this.actualUtilOptions = Array.apply(null, { length: 51 }).map(Number.call, Number);
     this.projectedUtilOptions = Array.apply(null, { length: 4 }).map(Number.call, Number);
   }
@@ -69,17 +70,17 @@ export class FilterDashboardComponent implements OnInit {
       this.dataSource.filterPredicate = (data: any, filtersJson: string) => {
         const matchFilter = [];
         const filters = JSON.parse(filtersJson);
-        const columns = (<any>Object).values(data);
-      
-        filters.forEach(filter => {      
+        const columns = (<any>Object).keys(data);
+        filters.forEach(filter => {
           const customFilter = [];
-          columns.forEach(column => customFilter.push(column.toLowerCase().includes(filter)));
-          matchFilter.push(customFilter.some(Boolean)); // OR
+          columns.forEach(column =>
+            customFilter.push(filter[column] == undefined || filter[column] == "" || data[column].toString().toLowerCase().includes(filter[column].toLowerCase()))
+          );
+          matchFilter.push(customFilter.every(Boolean));
         });
-      
-        // Choose one
-        return matchFilter.every(Boolean);
-      };
+        return matchFilter.every(Boolean); // AND condition
+      }
+
       //this.dataSource.filterPredicate = (data, filter: string) => data[filter.split('|')[0]].trim().toLowerCase() == filter.split('|')[1];
       this.paginator.pageSizeOptions = [10, 15, 20, 50, items.length];
       this.dataSource.paginator = this.paginator;
@@ -88,12 +89,17 @@ export class FilterDashboardComponent implements OnInit {
     });
   }
 
-  // applyFilter(target: any) {
-  //   this.dataSource.filter = target.name + '|' + target.value.trim().toLowerCase();
-  //   if (this.dataSource.paginator) {
-  //     this.dataSource.paginator.firstPage();
-  //   }
-  // }
+  getActualUtil() {
+    return (this.dataSource.filteredData.map(t => t['actualUtil' + this.selectedActual]).reduce((acc, value) => acc + value, 0)) / this.dataSource.filteredData.length;
+  }
+
+  getProjUtil() {
+    return (this.dataSource.filteredData.map(t => t['projUtil' + this.selectedProj]).reduce((acc, value) => acc + value, 0)) / this.dataSource.filteredData.length;
+  }
+
+  getFullUtil() {
+    return (this.dataSource.filteredData.map(t => t['fullUtil']).reduce((acc, value) => acc + value, 0)) / this.dataSource.filteredData.length;
+  }
 
   applyFilter() {
     const tableFilters = [];
@@ -106,6 +112,9 @@ export class FilterDashboardComponent implements OnInit {
       });
     });
     this.dataSource.filter = JSON.stringify(tableFilters);
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   exportAsExcel(eventTarget: string) {
