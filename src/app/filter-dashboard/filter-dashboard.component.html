@@ -13,6 +13,9 @@
         <input matInput (keyup)="applyFilter($event.target)" placeholder="Name" name="name" [(ngModel)]="filter.name">
       </mat-form-field>
       <mat-form-field>
+        <input matInput (keyup)="applyFilter($event.target)" placeholder="Rank Group" name="rankgroup" [(ngModel)]="filter.rankgroup">
+      </mat-form-field>
+      <mat-form-field>
         <input matInput (keyup)="applyFilter($event.target)" placeholder="Rank" name="rank" [(ngModel)]="filter.rank">
       </mat-form-field>
       <mat-form-field>

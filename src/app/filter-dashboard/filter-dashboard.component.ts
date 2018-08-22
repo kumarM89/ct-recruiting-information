@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { sp } from '@pnp/sp';
 import * as XLSX from 'xlsx';
+
 
 @Component({
   selector: 'app-filter-dashboard',
@@ -30,6 +31,7 @@ export class FilterDashboardComponent implements OnInit {
   pageSize: number = 10;
   filters: any[] = [{
     name: null,
+    rankGroup: null,
     rank: null,
     location: null,
     alignment: null
@@ -39,11 +41,11 @@ export class FilterDashboardComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('TABLE') table: ElementRef;
 
-  constructor(private router: Router) {
+  constructor(private route: ActivatedRoute, private router: Router) {
     this.actualUtilOptions = Array.apply(null, { length: 51 }).map(Number.call, Number);
     this.projectedUtilOptions = Array.apply(null, { length: 4 }).map(Number.call, Number);
   }
-
+ 
   ngOnInit() {
     sp.web.lists.getByTitle("Yearly Data").items.top(5000).get().then((items: any[]) => {
       this.rowData = items;
@@ -51,6 +53,7 @@ export class FilterDashboardComponent implements OnInit {
       const ELEMENT_DATA = items.map((value) => {
         var obj = {};
         obj['name'] = value.Title;
+        obj['rankgroup'] = value.RankGroup;
         obj['rank'] = value.RankDescription;
         obj['location'] = value.WorkLocation;
         obj['alignment'] = value.IOWPRoster;
@@ -86,6 +89,15 @@ export class FilterDashboardComponent implements OnInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.isLoadingResultsDone = true;
+      this.route
+      .params
+      .subscribe(params => {
+        this.filters.forEach((filter) => {
+          filter.rankGroup = params['RankGroup'];
+          filter.alignment = params['Alignment'];
+        });
+        this.applyFilter();
+      });
     });
   }
 
@@ -106,6 +118,7 @@ export class FilterDashboardComponent implements OnInit {
     this.filters.forEach((filter) => {
       tableFilters.push({
         name: filter.name,
+        rankgroup: filter.rankgroup,
         rank: filter.rank,
         location: filter.location,
         alignment: filter.alignment

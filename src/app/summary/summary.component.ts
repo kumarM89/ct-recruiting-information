@@ -4,13 +4,17 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import * as _ from 'lodash';
 import { sp } from '@pnp/sp';
 import * as XLSX from 'xlsx';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-summary',
   templateUrl: './summary.component.html',
   styleUrls: ['./summary.component.css']
 })
+
 export class SummaryComponent implements OnInit {
+
+
   displayedColumns: string[] = ['serial', 'rankgroup', 'alignment', 'actualUtil', 'projUtil', 'fullUtil'];
   rowData: any;
   dataSource: any;
@@ -30,11 +34,15 @@ export class SummaryComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('TABLE') table: ElementRef;
 
-  constructor() {
+  constructor(private router: Router) {
     this.actualUtilOptions = Array.apply(null, { length: 51 }).map(Number.call, Number);
     this.projectedUtilOptions = Array.apply(null, { length: 4 }).map(Number.call, Number);
-  }
 
+  }
+  selectRow(row) {
+    this.router.navigate(['/dashboard', { RankGroup: row.rankgroup, Alignment: row.alignment }]);
+  }
+  
   ngOnInit() {
     sp.web.lists.getByTitle("Yearly Data Grouped").items.top(5000).get().then((items: any[]) => {
       this.rowData = items;
