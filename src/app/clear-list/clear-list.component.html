@@ -1,0 +1,11 @@
+<mat-card>
+  <mat-form-field>
+    <mat-select placeholder="-- Select --">
+      <mat-option *ngFor="let list of lists" [value]="list.value">
+        {{list.viewValue}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-progress-bar color="accent" mode="determinate" [value]="progressValue">
+  </mat-progress-bar>
+</mat-card>

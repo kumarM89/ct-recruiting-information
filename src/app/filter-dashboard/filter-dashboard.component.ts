@@ -19,7 +19,7 @@ import * as XLSX from 'xlsx';
   ]
 })
 export class FilterDashboardComponent implements OnInit {
-  displayedColumns: string[] = ['serial', 'name', 'rank', 'location', 'alignment', 'actualUtil', 'projUtil', 'fullUtil'];
+  displayedColumns: string[] = ['serial', 'name', 'rankgroup', 'rank', 'location', 'alignment', 'actualUtil', 'projUtil', 'fullUtil'];
   rowData: any;
   dataSource: any;
   isLoadingResultsDone: boolean = false;
@@ -31,7 +31,7 @@ export class FilterDashboardComponent implements OnInit {
   pageSize: number = 10;
   filters: any[] = [{
     name: null,
-    rankGroup: null,
+    rankgroup: null,
     rank: null,
     location: null,
     alignment: null
@@ -47,7 +47,7 @@ export class FilterDashboardComponent implements OnInit {
   }
  
   ngOnInit() {
-    sp.web.lists.getByTitle("Yearly Data").items.top(5000).get().then((items: any[]) => {
+    sp.web.lists.getByTitle("Yearly Data").items.top(5000).orderBy("RankGroup", true).get().then((items: any[]) => {
       this.rowData = items;
       this.dateReported = items[0].ReportDate;
       const ELEMENT_DATA = items.map((value) => {
@@ -93,8 +93,8 @@ export class FilterDashboardComponent implements OnInit {
       .params
       .subscribe(params => {
         this.filters.forEach((filter) => {
-          filter.rankGroup = params['RankGroup'];
-          filter.alignment = params['Alignment'];
+          filter.rankgroup = params['RankGroup'] || "";
+          filter.alignment = params['Alignment'] || "";
         });
         this.applyFilter();
       });

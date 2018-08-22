@@ -40,11 +40,11 @@ export class SummaryComponent implements OnInit {
 
   }
   selectRow(row) {
-    this.router.navigate(['/dashboard', { RankGroup: row.rankgroup, Alignment: row.alignment }]);
+    this.router.navigate(['/dashboard', { RankGroup: row.rankgroup, Alignment: row.alignment || "" }]);
   }
   
   ngOnInit() {
-    sp.web.lists.getByTitle("Yearly Data Grouped").items.top(5000).get().then((items: any[]) => {
+    sp.web.lists.getByTitle("Yearly Data Grouped").items.top(5000).orderBy("Ordinal", true).get().then((items: any[]) => {
       this.rowData = items;
       this.dateReported = items[0].ReportDate;
       var groupedData = this.dataWithAlignment();
@@ -89,12 +89,12 @@ export class SummaryComponent implements OnInit {
         newObj['alignment'] = IOWPRoster;
         for (let actualVal in this.actualUtilOptions) {
           newObj['actualUtil' + actualVal] =
-            e.map(t => t['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / e.length;
+            ((e.map(t => t['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / e.length) + (newObj['actualUtil' + (parseInt(actualVal) - 1)] || 0)) / (parseInt(actualVal) + 1);
         }
 
         for (let projVal in this.projectedUtilOptions) {
           newObj['projUtil' + projVal] =
-            e.map(t => t['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / e.length;
+            ((e.map(t => t['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / e.length) + (newObj['projUtil' + (parseInt(projVal) - 1)] || 0)) / (parseInt(projVal) + 1);
         }
         newObj['fullUtil'] = e.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / e.length;
         return newObj;

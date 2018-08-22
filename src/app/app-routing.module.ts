@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SiteContentComponent } from './site-content/site-content.component';
-import { ExcelUploadComponent } from './excel-upload/excel-upload.component';
+import { ClearListComponent } from './clear-list/clear-list.component';
 import { FilterDashboardComponent } from './filter-dashboard/filter-dashboard.component';
 import { SummaryComponent } from './summary/summary.component';
 
@@ -10,7 +10,7 @@ const routes: Routes = [{
 }, {
   path: 'dashboard', component: FilterDashboardComponent
 }, {
-  path: 'excelUpload', component: ExcelUploadComponent
+  path: 'clearlist', component: ClearListComponent
 }, {
   path: 'summary', component: SummaryComponent
 }];
