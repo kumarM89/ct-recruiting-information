@@ -10,107 +10,254 @@
     </div>
     <div *ngFor="let filter of filters">
       <mat-form-field>
-        <input matInput (keyup)="applyFilter($event.target)" placeholder="Name" name="name" [(ngModel)]="filter.name">
+        <mat-select placeholder="Rank" [(ngModel)]="filter.rankGroup" (selectionChange)="applyFilter($event.target)">
+          <mat-option [value]="">-- Select --</mat-option>
+          <mat-option *ngFor="let rankGroup of rankGroups" [value]="rankGroup.value">
+            {{rankGroup.viewValue}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
       <mat-form-field>
-        <input matInput (keyup)="applyFilter($event.target)" placeholder="Rank Group" name="rankgroup" [(ngModel)]="filter.rankgroup">
+        <mat-select placeholder="Alignment" [(ngModel)]="filter.alignment" (selectionChange)="applyFilter($event.target)">
+          <mat-option [value]="">-- Select --</mat-option>
+          <mat-option *ngFor="let alignment of alignments" [value]="alignment.value">
+            {{alignment.viewValue}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
       <mat-form-field>
-        <input matInput (keyup)="applyFilter($event.target)" placeholder="Rank" name="rank" [(ngModel)]="filter.rank">
+        <mat-select placeholder="Location" [(ngModel)]="filter.location" (selectionChange)="applyFilter($event.target)">
+          <mat-option [value]="">-- Select --</mat-option>
+          <mat-option *ngFor="let location of locations" [value]="location.value">
+            {{location.viewValue}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
-      <mat-form-field>
-        <input matInput (keyup)="applyFilter($event.target)" placeholder="Location" name="location" [(ngModel)]="filter.location">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput (keyup)="applyFilter($event.target)" placeholder="Alignment" name="alignment" [(ngModel)]="filter.alignment">
-      </mat-form-field>
-    </div>
-    <div class="mat-elevation-z8" #TABLE>
-      <table mat-table #table [dataSource]="dataSource" matSort>
-        <!-- S.No. Column -->
-        <ng-container matColumnDef="serial">
-          <th mat-header-cell *matHeaderCellDef> S.No. </th>
-          <td mat-cell *matCellDef="let element = index"> {{element + 1}} </td>
-          <td mat-footer-cell *matFooterCellDef> Total </td>
-        </ng-container>
 
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-          <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
-        </ng-container>
+      <div class="mat-elevation-z8" #sTABLE>
+        <!-- Specific Hire Parameters Table-->
+        <mat-toolbar color="primary" class="grey">Specific Hire Parameters</mat-toolbar>
+        <table mat-table #sTable [dataSource]="dataSource" *ngIf="dataSource.filteredData.length > 0">
+          <!-- S.No. Column -->
+          <ng-container matColumnDef="serial">
+            <th mat-header-cell *matHeaderCellDef> S.No. </th>
+            <td mat-cell *matCellDef="let element = index"> {{element + 1}} </td>
+            <td mat-footer-cell *matFooterCellDef> Total </td>
+          </ng-container>
 
-        <!-- Rank Group Column -->
-        <ng-container matColumnDef="rankgroup">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Rank Group </th>
-          <td mat-cell *matCellDef="let element"> {{element.rankgroup}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
-        </ng-container>
+          <!-- Rank Group Column -->
+          <ng-container matColumnDef="rankGroup">
+            <th mat-header-cell *matHeaderCellDef> Rank Group </th>
+            <td mat-cell *matCellDef="let element"> {{element.rankGroup}} </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
 
-        <!-- Rank Column -->
-        <ng-container matColumnDef="rank">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Rank </th>
-          <td mat-cell *matCellDef="let element"> {{element.rank}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
-        </ng-container>
+          <!-- Alignment Column -->
+          <ng-container matColumnDef="alignment">
+            <th mat-header-cell *matHeaderCellDef> Alignment </th>
+            <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
 
-        <!-- Location Column -->
-        <ng-container matColumnDef="location">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Location </th>
-          <td mat-cell *matCellDef="let element"> {{element.location}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
-        </ng-container>
+          <!-- Location Column -->
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef> Location </th>
+            <td mat-cell *matCellDef="let element"> {{element.location}} </td>
+            <td mat-footer-cell *matFooterCellDef> </td>
+          </ng-container>
 
-        <!-- Alignment Column -->
-        <ng-container matColumnDef="alignment">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Alignment </th>
-          <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
-        </ng-container>
+          <!-- Actual Utilization Column -->
+          <ng-container matColumnDef="actualUtil">
+            <th mat-header-cell *matHeaderCellDef>
+              <span style="padding-right: 5px;">Previous </span>
+              <mat-form-field style="width: 40px; margin: 0;">
+                <mat-select [(value)]="selectedActual">
+                  <mat-option *ngFor="let index of actualUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div>wk Average Utilization</div>
+            </th>
+            <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActual] | number: '.1-2'}} % </td>
+            <td mat-footer-cell *matFooterCellDef> {{getActualUtil('specific') | number: '.1-2'}} % </td>
+          </ng-container>
 
-        <!-- Actual Utilization Column -->
-        <ng-container matColumnDef="actualUtil">
-          <th mat-header-cell *matHeaderCellDef>
-            <span style="padding-right: 5px;">Previous </span>
-            <mat-form-field style="width: 40px; margin: 0;">
-              <mat-select [(value)]="selectedActual">
-                <mat-option *ngFor="let index of actualUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div>wk Average Utilization</div>
-          </th>
-          <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActual] | number: '.1-2'}} % </td>
-          <td mat-footer-cell *matFooterCellDef> {{getActualUtil() | number: '.1-2'}} % </td>
-        </ng-container>
+          <!-- Projected Utilization Column -->
+          <ng-container matColumnDef="projUtil">
+            <th mat-header-cell *matHeaderCellDef>
+              <span style="padding-right: 5px;">Forecasted </span>
+              <mat-form-field style="width: 40px; margin: 0;">
+                <mat-select [(value)]="selectedProj">
+                  <mat-option *ngFor="let index of projectedUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div>wk Average Utilization</div>
+            </th>
+            <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProj] | number: '.1-2'}} % </td>
+            <td mat-footer-cell *matFooterCellDef> {{getProjUtil('specific') | number: '.1-2'}} % </td>
+          </ng-container>
 
-        <!-- Projected Utilization Column -->
-        <ng-container matColumnDef="projUtil">
-          <th mat-header-cell *matHeaderCellDef>
-            <span style="padding-right: 5px;">Forecasted </span>
-            <mat-form-field style="width: 40px; margin: 0;">
-              <mat-select [(value)]="selectedProj">
-                <mat-option *ngFor="let index of projectedUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div>wk Average Utilization</div>
-          </th>
-          <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProj] | number: '.1-2'}} % </td>
-          <td mat-footer-cell *matFooterCellDef> {{getProjUtil() | number: '.1-2'}} % </td>
-        </ng-container>
+          <!-- Last Week Full Utilization Column -->
+          <ng-container matColumnDef="fullUtil">
+            <th mat-header-cell *matHeaderCellDef> Last Week Full Utilization </th>
+            <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
+            <td mat-footer-cell *matFooterCellDef> {{getFullUtil('specific') | number: '.1-2'}} % </td>
+          </ng-container>
 
-        <!-- Last Week Full Utilization Column -->
-        <ng-container matColumnDef="fullUtil">
-          <th mat-header-cell *matHeaderCellDef> Last Week Full Utilization </th>
-          <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
-          <td mat-footer-cell *matFooterCellDef> {{getFullUtil() | number: '.1-2'}} % </td>
-        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
+        </table>
+        <div *ngIf="dataSource.filteredData.length === 0">No records found</div>
+      </div>
+      <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons #sPaginator></mat-paginator>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
-      </table>
+      <div *ngIf="filter.rankGroup && filter.alignment && filter.location">
+        <div class="mat-elevation-z8" #cTABLE>
+          <!-- Comparables Table-->
+          <mat-toolbar color="primary" class="grey">Comparables</mat-toolbar>
+          <table mat-table #cTable [dataSource]="dataSourceComparables" *ngIf="dataSourceComparables.filteredData.length > 0">
+            <!-- S.No. Column -->
+            <ng-container matColumnDef="serial">
+              <th mat-header-cell *matHeaderCellDef> S.No. </th>
+              <td mat-cell *matCellDef="let element = index"> {{element + 1}} </td>
+              <td mat-footer-cell *matFooterCellDef> Total </td>
+            </ng-container>
+
+            <!-- Rank Group Column -->
+            <ng-container matColumnDef="rankGroup">
+              <th mat-header-cell *matHeaderCellDef> Rank Group </th>
+              <td mat-cell *matCellDef="let element"> {{element.rankGroup}} </td>
+              <td mat-footer-cell *matFooterCellDef> </td>
+            </ng-container>
+
+            <!-- Alignment Column -->
+            <ng-container matColumnDef="alignment">
+              <th mat-header-cell *matHeaderCellDef> Alignment </th>
+              <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+              <td mat-footer-cell *matFooterCellDef> </td>
+            </ng-container>
+
+            <!-- Location Column -->
+            <ng-container matColumnDef="location">
+              <th mat-header-cell *matHeaderCellDef> Location </th>
+              <td mat-cell *matCellDef="let element"> {{element.location}} </td>
+              <td mat-footer-cell *matFooterCellDef> </td>
+            </ng-container>
+
+            <!-- Actual Utilization Column -->
+            <ng-container matColumnDef="actualUtil">
+              <th mat-header-cell *matHeaderCellDef>
+                <span style="padding-right: 5px;">Previous </span>
+                <mat-form-field style="width: 40px; margin: 0;">
+                  <mat-select [(value)]="selectedActualComparable">
+                    <mat-option *ngFor="let index of actualUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div>wk Average Utilization</div>
+              </th>
+              <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActualComparable] | number: '.1-2'}} % </td>
+              <td mat-footer-cell *matFooterCellDef> {{getActualUtil('comparable') | number: '.1-2'}} % </td>
+            </ng-container>
+
+            <!-- Projected Utilization Column -->
+            <ng-container matColumnDef="projUtil">
+              <th mat-header-cell *matHeaderCellDef>
+                <span style="padding-right: 5px;">Forecasted </span>
+                <mat-form-field style="width: 40px; margin: 0;">
+                  <mat-select [(value)]="selectedProjComparable">
+                    <mat-option *ngFor="let index of projectedUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div>wk Average Utilization</div>
+              </th>
+              <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProjComparable] | number: '.1-2'}} % </td>
+              <td mat-footer-cell *matFooterCellDef> {{getProjUtil('comparable') | number: '.1-2'}} % </td>
+            </ng-container>
+
+            <!-- Last Week Full Utilization Column -->
+            <ng-container matColumnDef="fullUtil">
+              <th mat-header-cell *matHeaderCellDef> Last Week Full Utilization </th>
+              <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
+              <td mat-footer-cell *matFooterCellDef> {{getFullUtil('comparable') | number: '.1-2'}} % </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
+          </table>
+          <div *ngIf="dataSourceComparables.filteredData.length === 0">No records found</div>
+        </div>
+      <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons #cPaginator></mat-paginator></div>
+
+      <div *ngIf="filter.rankGroup && filter.alignment && filter.location">
+        <div class="mat-elevation-z8" #cTABLE>
+          <!-- SubTotal Table-->
+          <mat-toolbar color="primary" class="grey">Sub Total</mat-toolbar>
+          <table mat-table #cTable [dataSource]="dataSourceTotal" *ngIf="dataSourceTotal.filteredData.length > 0">
+            <!-- S.No. Column -->
+            <ng-container matColumnDef="serial">
+              <th mat-header-cell *matHeaderCellDef> S.No. </th>
+              <td mat-cell *matCellDef="let element = index"> {{element + 1}} </td>
+            </ng-container>
+
+            <!-- Rank Group Column -->
+            <ng-container matColumnDef="rankGroup">
+              <th mat-header-cell *matHeaderCellDef> Rank Group </th>
+              <td mat-cell *matCellDef="let element"> {{element.rankGroup}} </td>
+            </ng-container>
+
+            <!-- Alignment Column -->
+            <ng-container matColumnDef="alignment">
+              <th mat-header-cell *matHeaderCellDef> Alignment </th>
+              <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+            </ng-container>
+
+            <!-- Location Column -->
+            <ng-container matColumnDef="location">
+              <th mat-header-cell *matHeaderCellDef> Location </th>
+              <td mat-cell *matCellDef="let element"> {{element.location}} </td>
+            </ng-container>
+
+            <!-- Actual Utilization Column -->
+            <ng-container matColumnDef="actualUtil">
+              <th mat-header-cell *matHeaderCellDef>
+                <span style="padding-right: 5px;">Previous </span>
+                <mat-form-field style="width: 40px; margin: 0;">
+                  <mat-select [(value)]="selectedActualTotal">
+                    <mat-option *ngFor="let index of actualUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div>wk Average Utilization</div>
+              </th>
+              <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActualTotal] | number: '.1-2'}} % </td>
+            </ng-container>
+
+            <!-- Projected Utilization Column -->
+            <ng-container matColumnDef="projUtil">
+              <th mat-header-cell *matHeaderCellDef>
+                <span style="padding-right: 5px;">Forecasted </span>
+                <mat-form-field style="width: 40px; margin: 0;">
+                  <mat-select [(value)]="selectedProjTotal">
+                    <mat-option *ngFor="let index of projectedUtilOptions" value="{{index}}">{{index + 1}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div>wk Average Utilization</div>
+              </th>
+              <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProjTotal] | number: '.1-2'}} % </td>
+            </ng-container>
+
+            <!-- Last Week Full Utilization Column -->
+            <ng-container matColumnDef="fullUtil">
+              <th mat-header-cell *matHeaderCellDef> Last Week Full Utilization </th>
+              <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+          <div *ngIf="dataSourceTotal.filteredData.length === 0">No records found</div>
+        </div>
+      </div>
     </div>
   </div>
-  <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons></mat-paginator>
 </mat-card>

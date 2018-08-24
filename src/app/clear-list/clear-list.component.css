@@ -1,0 +1,19 @@
+table {
+  width: 100%;
+}
+
+.mat-form-field {
+  font-size: 14px;
+  width: 10%;
+  margin: 10px;
+}
+
+.mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: #ffe600;
+}
+
+#btnExport {
+  background: #7f7f80;
+  margin-left: 10px;
+}

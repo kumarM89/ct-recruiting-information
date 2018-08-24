@@ -1,11 +1,12 @@
 <mat-card>
   <mat-form-field>
-    <mat-select placeholder="-- Select --">
+    <mat-select placeholder="-- Select --" [(ngModel)]="selectedList">
       <mat-option *ngFor="let list of lists" [value]="list.value">
         {{list.viewValue}}
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-progress-bar color="accent" mode="determinate" [value]="progressValue">
+  <button id="btnClear" mat-raised-button color="primary" (click)="clearList($event.target)" [disabled]="!selectedList">Clear List</button>
+  <mat-progress-bar color="warn" mode="determinate" [value]="progressValue">
   </mat-progress-bar>
 </mat-card>

@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
-import { animate, state, style, transition, trigger } from '@angular/animations';
 import * as _ from 'lodash';
 import { sp } from '@pnp/sp';
 import * as XLSX from 'xlsx';
