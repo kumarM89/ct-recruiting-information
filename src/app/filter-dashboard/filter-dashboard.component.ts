@@ -244,4 +244,5 @@ export class FilterDashboardComponent implements OnInit {
     /* save to file */
     XLSX.writeFile(wb, 'UtilizationDashboard.xlsx');
   }
+
 }

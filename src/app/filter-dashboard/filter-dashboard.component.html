@@ -11,7 +11,7 @@
     <div *ngFor="let filter of filters">
       <mat-form-field>
         <mat-select placeholder="Rank" [(ngModel)]="filter.rankGroup" (selectionChange)="applyFilter($event.target)">
-          <mat-option [value]="">-- Select --</mat-option>
+          <mat-option [value]="">-- All --</mat-option>
           <mat-option *ngFor="let rankGroup of rankGroups" [value]="rankGroup.value">
             {{rankGroup.viewValue}}
           </mat-option>
@@ -19,7 +19,7 @@
       </mat-form-field>
       <mat-form-field>
         <mat-select placeholder="Alignment" [(ngModel)]="filter.alignment" (selectionChange)="applyFilter($event.target)">
-          <mat-option [value]="">-- Select --</mat-option>
+          <mat-option [value]="">-- All --</mat-option>
           <mat-option *ngFor="let alignment of alignments" [value]="alignment.value">
             {{alignment.viewValue}}
           </mat-option>
@@ -27,12 +27,14 @@
       </mat-form-field>
       <mat-form-field>
         <mat-select placeholder="Location" [(ngModel)]="filter.location" (selectionChange)="applyFilter($event.target)">
-          <mat-option [value]="">-- Select --</mat-option>
+          <mat-option [value]="">-- All --</mat-option>
           <mat-option *ngFor="let location of locations" [value]="location.value">
             {{location.viewValue}}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
+   
 
       <div class="mat-elevation-z8" #sTABLE>
         <!-- Specific Hire Parameters Table-->
