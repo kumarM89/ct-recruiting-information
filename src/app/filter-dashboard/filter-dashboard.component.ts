@@ -39,11 +39,15 @@ export class FilterDashboardComponent implements OnInit {
   filters: any[] = [{
     rankGroup: null,
     location: null,
-    alignment: null
+    alignment: null,
+    competency:null,
+    group: null
   }];
   rankGroups: any[];
   alignments: any[];
   locations: any[];
+  competencies: any[];
+  groups: any[];
 
   @ViewChild('sPaginator') sPaginator: MatPaginator;
   @ViewChild('cPaginator') cPaginator: MatPaginator;
@@ -58,7 +62,9 @@ export class FilterDashboardComponent implements OnInit {
   ngOnInit() {
     sp.web.lists.getByTitle("Yearly Data").items.orderBy("RankGroup", true).getAll().then((items: any[]) => {
       this.rowData = items;
-      this.rankGroups = items.map(item => { return { value: item.RankGroup, viewValue: item.RankGroup } }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
+      this.rankGroups = items.map(item => { return { value: item.RankGroup, viewValue: item.RankGroup} }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
+      this.competencies = items.map(item => { return { value: item.CompetencyName, viewValue: item.CompetencyName} }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
+      this.groups = items.map(item => { return { value: item.Grouping, viewValue: item.Grouping} }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
       this.alignments = items.map(item => { return { value: item.IOWPRoster, viewValue: item.IOWPRoster } }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
       this.locations = items.map(item => { return { value: item.WorkLocation, viewValue: item.WorkLocation.split(',')[0] } }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
 
@@ -95,7 +101,7 @@ export class FilterDashboardComponent implements OnInit {
         filters.forEach(filter => {
           const customFilter = [];
           columns.forEach(column =>
-            customFilter.push(filter[column] == undefined || filter[column] == "" || data[column].toString().toLowerCase() == filter[column].toLowerCase())
+            customFilter.push(filter[column] == undefined || filter[column] == "" || (data[column] != null && data[column].toString().toLowerCase() == filter[column].toLowerCase()))
           );
           matchFilter.push(customFilter.every(Boolean));
         });
@@ -173,7 +179,8 @@ export class FilterDashboardComponent implements OnInit {
       tableFilters.push({
         rankGroup: filter.rankGroup,
         location: filter.location,
-        alignment: filter.alignment
+        alignment: filter.alignment,
+        competency: filter.competency
       });
     });
     this.dataSource.filter = JSON.stringify(tableFilters);
@@ -186,6 +193,23 @@ export class FilterDashboardComponent implements OnInit {
     const filters = JSON.parse(tableFilters);
     filters.forEach(filter => {
       var obj = {};
+
+      obj['rankGroup'] = filter.rankGroup;
+      obj['alignment'] = filter.alignment + this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
+        .map(item => item.Grouping).filter((v, i, a) => a.indexOf(v) == i).shift();
+      obj['location'] = filter.location;
+      const filtered_Items = this.rowData.filter((v, i) => { return v.RankGroup == filter.rankGroup && v.Grouping == obj['alignment'] && v.location ==  filter.location && v.Competency == filter.Competency && v.group == filter.group })
+      for (let actualVal in this.actualUtilOptions) {
+        obj['actualUtil' + actualVal] = ((filtered_Items.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filtered_Items.length) + (obj['actualUtil' + (parseInt(actualVal) - 1)] || 0)) / (parseInt(actualVal) + 1);
+      }
+      for (let projVal in this.projectedUtilOptions) {
+        obj['projUtil' + projVal] = ((filtered_Items.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filtered_Items.length) + (obj['projUtil' + (parseInt(projVal) - 1)] || 0)) / (parseInt(projVal) + 1);
+      }
+      obj['fullUtil'] = filtered_Items.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / filtered_Items.length;
+      tableData.push(obj);
+
+
+
       // Alignment Grouping Data Row
       obj['rankGroup'] = filter.rankGroup;
       obj['alignment'] = 'All ' + this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
@@ -243,6 +267,22 @@ export class FilterDashboardComponent implements OnInit {
 
     /* save to file */
     XLSX.writeFile(wb, 'UtilizationDashboard.xlsx');
+  }
+
+  btnClear()
+  {
+    this.route
+        .params
+        .subscribe(params => {
+          this.filters.forEach((filter) => {
+            filter.rankGroup = params['RankGroup'] || "";
+            filter.alignment = params['Alignment'] || "";
+            filter.location = params['Location'] || "";
+            
+          });
+          this.applyFilter();
+        });
+
   }
 
 }
