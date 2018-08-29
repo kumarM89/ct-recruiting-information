@@ -20,7 +20,7 @@ import * as _ from 'lodash';
   ]
 })
 export class FilterDashboardComponent implements OnInit {
-  displayedColumns: string[] = ['serial', 'rankGroup', 'alignment', 'location', 'actualUtil', 'projUtil', 'fullUtil'];
+  displayedColumns: string[] = ['serial', 'rankGroup', 'alignment', 'location', 'actualUtil', 'projUtil', 'fullUtil', 'headcount'];
   rowData: any;
   dataSource: any;
   dataSourceComparables: any;
@@ -46,7 +46,6 @@ export class FilterDashboardComponent implements OnInit {
   locations: any[];
 
   @ViewChild('sPaginator') sPaginator: MatPaginator;
-  @ViewChild('cPaginator') cPaginator: MatPaginator;
   @ViewChild('sTABLE') sTable: ElementRef;
   @ViewChild('cTABLE') cTable: ElementRef;
 
@@ -58,9 +57,14 @@ export class FilterDashboardComponent implements OnInit {
   ngOnInit() {
     sp.web.lists.getByTitle("Yearly Data").items.orderBy("RankGroup", true).getAll().then((items: any[]) => {
       this.rowData = items;
-      this.rankGroups = items.map(item => { return { value: item.RankGroup, viewValue: item.RankGroup } }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
-      this.alignments = items.map(item => { return { value: item.IOWPRoster, viewValue: item.IOWPRoster } }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
-      this.locations = items.map(item => { return { value: item.WorkLocation, viewValue: item.WorkLocation.split(',')[0] } }).filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
+      this.rankGroups = items.map(item => { return { value: item.RankGroup, viewValue: item.RankGroup } })
+        .filter((v, i, a) => a.findIndex(d => d.value == v.value) == i);
+      this.alignments = items.map(item => { return { value: item.IOWPRoster, viewValue: item.IOWPRoster } })
+        .filter((v, i, a) => a.findIndex(d => d.value == v.value) == i)
+        .sort((a, b) => a.viewValue.localeCompare(b.viewValue));
+      this.locations = items.map(item => { return { value: item.WorkLocation, viewValue: item.WorkLocation.split(',')[0] } })
+        .filter((v, i, a) => a.findIndex(d => d.value == v.value) == i)
+        .sort((a, b) => a.viewValue.localeCompare(b.viewValue));
 
       this.dateReported = items[0].ReportDate;
 
@@ -72,14 +76,15 @@ export class FilterDashboardComponent implements OnInit {
             newObj['alignment'] = IOWPRoster;
             newObj['alignmentGroup'] = k[0].Grouping;
             newObj['competency'] = k[0].CompetencyName;
-            newObj['location'] = WorkLocation
+            newObj['location'] = WorkLocation;
+            newObj['headcount'] = k.length;
             for (let actualVal in this.actualUtilOptions) {
               newObj['actualUtil' + actualVal] =
-                ((k.map(t => t['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / k.length) + (newObj['actualUtil' + (parseInt(actualVal) - 1)] || 0)) / (parseInt(actualVal) + 1);
+                ((k.map(t => t['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / k.length) + ((newObj['actualUtil' + (parseInt(actualVal) - 1)] || 0) * parseInt(actualVal))) / (parseInt(actualVal) + 1);
             }
             for (let projVal in this.projectedUtilOptions) {
               newObj['projUtil' + projVal] =
-                ((k.map(t => t['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / k.length) + (newObj['projUtil' + (parseInt(projVal) - 1)] || 0)) / (parseInt(projVal) + 1);
+                ((k.map(t => t['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / k.length) + ((newObj['projUtil' + (parseInt(projVal) - 1)] || 0) * parseInt(projVal))) / (parseInt(projVal) + 1);
             }
             newObj['fullUtil'] = k.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / k.length;
             return newObj;
@@ -124,7 +129,7 @@ export class FilterDashboardComponent implements OnInit {
           const customFilter = [];
           customFilter.push(filter.rankGroup && data.rankGroup.trim().toLowerCase() == filter.rankGroup.trim().toLowerCase()
             && filter.alignment && data.alignment.trim().toLowerCase() == filter.alignment.trim().toLowerCase()
-            && filter.location && data.location.trim().toLowerCase() != filter.location.trim().toLowerCase());
+            && (!filter.location || data.location.trim().toLowerCase() != filter.location.trim().toLowerCase()));
           matchFilter.push(customFilter.every(Boolean));
         });
         return matchFilter.every(Boolean);
@@ -134,8 +139,6 @@ export class FilterDashboardComponent implements OnInit {
       setTimeout(() => {
         this.sPaginator.pageSizeOptions = [10, 15, 20, 50, items.length];
         this.dataSource.paginator = this.sPaginator;
-        this.cPaginator.pageSizeOptions = [10, 15, 20, 50, items.length];
-        this.dataSourceComparables.paginator = this.cPaginator;
       });
       // this.route
       //   .params
@@ -188,49 +191,52 @@ export class FilterDashboardComponent implements OnInit {
       var obj = {};
       // Alignment Grouping Data Row
       obj['rankGroup'] = filter.rankGroup;
-      obj['alignment'] = 'All ' + this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
+      obj['alignment'] = this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
         .map(item => item.Grouping).filter((v, i, a) => a.indexOf(v) == i).shift();
       obj['location'] = 'All Locations';
       const filteredItems = this.rowData.filter((v, i) => { return v.RankGroup == filter.rankGroup && v.Grouping == obj['alignment'] })
       for (let actualVal in this.actualUtilOptions) {
-        obj['actualUtil' + actualVal] = ((filteredItems.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredItems.length) + (obj['actualUtil' + (parseInt(actualVal) - 1)] || 0)) / (parseInt(actualVal) + 1);
+        obj['actualUtil' + actualVal] = ((filteredItems.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredItems.length) + ((obj['actualUtil' + (parseInt(actualVal) - 1)] || 0) * parseInt(actualVal))) / (parseInt(actualVal) + 1);
       }
       for (let projVal in this.projectedUtilOptions) {
-        obj['projUtil' + projVal] = ((filteredItems.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredItems.length) + (obj['projUtil' + (parseInt(projVal) - 1)] || 0)) / (parseInt(projVal) + 1);
+        obj['projUtil' + projVal] = ((filteredItems.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredItems.length) + ((obj['projUtil' + (parseInt(projVal) - 1)] || 0) * parseInt(projVal))) / (parseInt(projVal) + 1);
       }
       obj['fullUtil'] = filteredItems.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / filteredItems.length;
+      obj['headcount'] = filteredItems.length;
       tableData.push(obj);
 
       // Competency Data Row
       obj = {};
       obj['rankGroup'] = filter.rankGroup;
-      obj['alignment'] = 'All ' + this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
+      obj['alignment'] = this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
         .map(item => item.CompetencyName).filter((v, i, a) => a.indexOf(v) == i).shift();
       obj['location'] = 'All Locations';
       const filteredCompetencyItems = this.rowData.filter((v, i) => { return v.RankGroup == filter.rankGroup && v.CompetencyName == obj['alignment'] })
       for (let actualVal in this.actualUtilOptions) {
-        obj['actualUtil' + actualVal] = ((filteredCompetencyItems.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredCompetencyItems.length) + (obj['actualUtil' + (parseInt(actualVal) - 1)] || 0)) / (parseInt(actualVal) + 1);
+        obj['actualUtil' + actualVal] = ((filteredCompetencyItems.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredCompetencyItems.length) + ((obj['actualUtil' + (parseInt(actualVal) - 1)] || 0) * parseInt(actualVal))) / (parseInt(actualVal) + 1);
       }
       for (let projVal in this.projectedUtilOptions) {
-        obj['projUtil' + projVal] = ((filteredCompetencyItems.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredCompetencyItems.length) + (obj['projUtil' + (parseInt(projVal) - 1)] || 0)) / (parseInt(projVal) + 1);
+        obj['projUtil' + projVal] = ((filteredCompetencyItems.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredCompetencyItems.length) + ((obj['projUtil' + (parseInt(projVal) - 1)] || 0) * parseInt(projVal))) / (parseInt(projVal) + 1);
       }
       obj['fullUtil'] = filteredCompetencyItems.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / filteredCompetencyItems.length;
+      obj['headcount'] = filteredCompetencyItems.length;
       tableData.push(obj);
 
       // All Ranks Data Row
       obj = {};
       obj['rankGroup'] = 'All Ranks';
-      obj['alignment'] = 'All ' + this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
+      obj['alignment'] = this.rowData.filter((v, i) => { return v.IOWPRoster == filter.alignment })
         .map(item => item.CompetencyName).filter((v, i, a) => a.indexOf(v) == i).shift();
       obj['location'] = 'All Locations';
       const filteredRanksItems = this.rowData.filter((v, i) => { return v.CompetencyName == obj['alignment'] })
       for (let actualVal in this.actualUtilOptions) {
-        obj['actualUtil' + actualVal] = ((filteredRanksItems.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredRanksItems.length) + (obj['actualUtil' + (parseInt(actualVal) - 1)] || 0)) / (parseInt(actualVal) + 1);
+        obj['actualUtil' + actualVal] = ((filteredRanksItems.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredRanksItems.length) + ((obj['actualUtil' + (parseInt(actualVal) - 1)] || 0) * parseInt(actualVal))) / (parseInt(actualVal) + 1);
       }
       for (let projVal in this.projectedUtilOptions) {
-        obj['projUtil' + projVal] = ((filteredRanksItems.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredRanksItems.length) + (obj['projUtil' + (parseInt(projVal) - 1)] || 0)) / (parseInt(projVal) + 1);
+        obj['projUtil' + projVal] = ((filteredRanksItems.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filteredRanksItems.length) + ((obj['projUtil' + (parseInt(projVal) - 1)] || 0) * parseInt(projVal))) / (parseInt(projVal) + 1);
       }
       obj['fullUtil'] = filteredRanksItems.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / filteredRanksItems.length;
+      obj['headcount'] = filteredRanksItems.length;
       tableData.push(obj);
     });
     return tableData;
