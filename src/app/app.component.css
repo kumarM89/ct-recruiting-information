@@ -1,19 +1,21 @@
-.toolbar {
-    justify-content: space-between;
+.projectDesc {
+  color: #ffe600;
+  margin-left: 35%;
+  font-size: 25px;
 }
 
 body {
-    min-height: 600px;
+  min-height: 600px;
 }
 
 a.active {
-    color: #ffe600;
+  color: #ffe600;
 }
 
 .grey {
-    background: rgba(128, 128, 128, 1);
+  background: rgba(128, 128, 128, 1);
 }
 
 .mat-form-field-label {
-    color: black;
+  color: black;
 }
