@@ -6,9 +6,10 @@
       <button id="btnExport" mat-raised-button color="primary" (click)="exportAsExcel($event.target)">Export to Excel</button>
     </div>
     <div *ngFor="let filter of filters">
-      <div style="color: #551a8b; font-size: 10px;">* To view the comparative details, please select all the three criterias (Rank, Alignment and Location)</div>
+      <div style="color: #551a8b; font-size: 10px;">* To view the comparative details, please select all the three criterias
+        (Rank, Discipline and Location)</div>
       <mat-form-field>
-        <mat-select placeholder="Rank" [(ngModel)]="filter.rankGroup" (selectionChange)="applyFilter($event.target)">
+        <mat-select placeholder="Rank" [(ngModel)]="filter.rankGroup" (selectionChange)="applyFilter($event.target);filter.competency=NULL;filter.group=NULL;filter.discipline=NULL; filter.location=NULL">
           <mat-option [value]="">-- All --</mat-option>
           <mat-option *ngFor="let rankGroup of rankGroups" [value]="rankGroup.value">
             {{rankGroup.viewValue}}
@@ -17,7 +18,7 @@
       </mat-form-field>
 
       <mat-form-field>
-        <mat-select placeholder="Competency" [(ngModel)]="filter.competency" (selectionChange)="applyFilter($event.target)">
+        <mat-select placeholder="Competency" [(ngModel)]="filter.competency" (selectionChange)="applyFilter($event.target);filter.group=NULL;filter.discipline=NULL; filter.location=NULL">
           <mat-option [value]="">-- All --</mat-option>
           <mat-option *ngFor="let competency of competencies" [value]="competency.value">
             {{competency.viewValue}}
@@ -26,33 +27,33 @@
       </mat-form-field>
 
       <mat-form-field>
-        <mat-select placeholder="Group" [(ngModel)]="filter.group" (selectionChange)="applyFilter($event.target)">
+        <mat-select placeholder="Group" [(ngModel)]="filter.group" (selectionChange)="applyFilter($event.target);filter.discipline=NULL; filter.location=NULL">
           <mat-option [value]="">-- All --</mat-option>
-          <mat-option *ngFor="let group of groups" [value]="alignment.value">
+          <mat-option *ngFor="let group of groups | filteredGroups: filter.competency" [value]="group.value">
             {{group.viewValue}}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field>
-        <mat-select placeholder="Alignment" [(ngModel)]="filter.alignment" (selectionChange)="applyFilter($event.target)">
+        <mat-select placeholder="Discipline" [(ngModel)]="filter.discipline" (selectionChange)="applyFilter($event.target); filter.location=NULL">
           <mat-option [value]="">-- All --</mat-option>
-          <mat-option *ngFor="let alignment of alignments" [value]="alignment.value">
-            {{alignment.viewValue}}
+          <mat-option *ngFor="let discipline of disciplines | filteredGroups: filter.group" [value]="discipline.value">
+            {{discipline.viewValue}}
           </mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
-        <mat-select placeholder="Location" [(ngModel)]="filter.location" (selectionChange)="applyFilter($event.target)">
+        <mat-select placeholder="Location" [(ngModel)]="filter.location" (selectionChange)="applyFilter($event.target);">
           <mat-option [value]="">-- All --</mat-option>
-          <mat-option *ngFor="let location of locations" [value]="location.value">
+          <mat-option *ngFor="let location of locations | filteredGroups: filter.discipline: filter.rankGroup" [value]="location.value">
             {{location.viewValue}}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <button id="btnClear" mat-raised-button color="primary" (click)="btnClear()">Clear All</button>
-   
+
 
       <div class="mat-elevation-z8" #sTABLE>
         <!-- Specific Hire Parameters Table-->
@@ -70,10 +71,10 @@
             <td mat-cell *matCellDef="let element"> {{element.rankGroup}} </td>
           </ng-container>
 
-          <!-- Alignment Column -->
-          <ng-container matColumnDef="alignment">
-            <th mat-header-cell *matHeaderCellDef> Alignment </th>
-            <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+          <!-- Discipline Column -->
+          <ng-container matColumnDef="discipline">
+            <th mat-header-cell *matHeaderCellDef> Discipline </th>
+            <td mat-cell *matCellDef="let element"> {{element.discipline}} </td>
           </ng-container>
 
           <!-- Location Column -->
@@ -116,9 +117,9 @@
             <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
           </ng-container>
 
-          <!-- Headcount Column -->
+          <!-- Headcount (FTE's) Column -->
           <ng-container matColumnDef="headcount">
-            <th mat-header-cell *matHeaderCellDef> Headcount </th>
+            <th mat-header-cell *matHeaderCellDef> FTE's </th>
             <td mat-cell *matCellDef="let element"> {{element.headcount}} </td>
           </ng-container>
 
@@ -129,7 +130,7 @@
       </div>
       <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons #sPaginator></mat-paginator>
 
-      <div *ngIf="filter.rankGroup && filter.alignment && filter.location">
+      <div *ngIf="filter.rankGroup && filter.discipline && filter.location">
         <div class="mat-elevation-z8" #cTABLE>
           <!-- Comparables Table-->
           <mat-toolbar color="primary" class="grey">Comparables</mat-toolbar>
@@ -146,10 +147,10 @@
               <td mat-cell *matCellDef="let element"> {{element.rankGroup}} </td>
             </ng-container>
 
-            <!-- Alignment Column -->
-            <ng-container matColumnDef="alignment">
-              <th mat-header-cell *matHeaderCellDef> Alignment </th>
-              <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+            <!-- Discipline Column -->
+            <ng-container matColumnDef="discipline">
+              <th mat-header-cell *matHeaderCellDef> Discipline </th>
+              <td mat-cell *matCellDef="let element"> {{element.discipline}} </td>
             </ng-container>
 
             <!-- Location Column -->
@@ -169,7 +170,8 @@
                 </mat-form-field>
                 <div>wk Average Utilization</div>
               </th>
-              <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActualComparable] | number: '.1-2'}} % </td>
+              <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActualComparable] | number: '.1-2'}}
+                % </td>
             </ng-container>
 
             <!-- Projected Utilization Column -->
@@ -183,7 +185,8 @@
                 </mat-form-field>
                 <div>wk Average Utilization</div>
               </th>
-              <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProjComparable] | number: '.1-2'}} % </td>
+              <td mat-cell *matCellDef="let element"> {{element['projUtil' + selectedProjComparable] | number: '.1-2'}} %
+              </td>
             </ng-container>
 
             <!-- Last Week Full Utilization Column -->
@@ -192,9 +195,9 @@
               <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
             </ng-container>
 
-            <!-- Headcount Column -->
+            <!-- Headcount (FTE's) Column -->
             <ng-container matColumnDef="headcount">
-              <th mat-header-cell *matHeaderCellDef> Headcount </th>
+              <th mat-header-cell *matHeaderCellDef> FTE's </th>
               <td mat-cell *matCellDef="let element"> {{element.headcount}} </td>
             </ng-container>
 
@@ -205,7 +208,7 @@
         </div>
       </div>
 
-      <div *ngIf="filter.rankGroup && filter.alignment">
+      <div *ngIf="filter.rankGroup && filter.discipline">
         <div class="mat-elevation-z8" #cTABLE>
           <!-- SubTotal Table-->
           <mat-toolbar color="primary" class="grey">Sub Total</mat-toolbar>
@@ -222,16 +225,16 @@
               <td mat-cell *matCellDef="let element"> {{element.rankGroup}} </td>
             </ng-container>
 
-            <!-- Alignment Column -->
-            <ng-container matColumnDef="alignment">
-              <th mat-header-cell *matHeaderCellDef> Alignment </th>
-              <td mat-cell *matCellDef="let element"> {{element.alignment}} </td>
+            <!-- Discipline Column -->
+            <ng-container matColumnDef="discipline">
+              <th mat-header-cell *matHeaderCellDef> Discipline </th>
+              <td mat-cell *matCellDef="let element">{{element.discipline}} </td>
             </ng-container>
 
             <!-- Location Column -->
             <ng-container matColumnDef="location">
               <th mat-header-cell *matHeaderCellDef> Location </th>
-              <td mat-cell *matCellDef="let element"> {{element.location}} </td>
+              <td mat-cell *matCellDef="let element">All Locations </td>
             </ng-container>
 
             <!-- Actual Utilization Column -->
@@ -245,7 +248,8 @@
                 </mat-form-field>
                 <div>wk Average Utilization</div>
               </th>
-              <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActualTotal] | number: '.1-2'}} % </td>
+              <td mat-cell *matCellDef="let element"> {{element['actualUtil' + selectedActualTotal] | number: '.1-2'}} %
+              </td>
             </ng-container>
 
             <!-- Projected Utilization Column -->
@@ -268,9 +272,9 @@
               <td mat-cell *matCellDef="let element"> {{element.fullUtil | number: '.1-2'}} % </td>
             </ng-container>
 
-            <!-- Headcount Column -->
+            <!-- Headcount (FTE's) Column -->
             <ng-container matColumnDef="headcount">
-              <th mat-header-cell *matHeaderCellDef> Headcount </th>
+              <th mat-header-cell *matHeaderCellDef> FTE's </th>
               <td mat-cell *matCellDef="let element"> {{element.headcount}} </td>
             </ng-container>
 

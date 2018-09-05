@@ -10,6 +10,7 @@ import { ExcelUploadComponent } from './excel-upload/excel-upload.component';
 import { FilterDashboardComponent } from './filter-dashboard/filter-dashboard.component';
 import { SummaryComponent } from './summary/summary.component';
 import { ClearListComponent } from './clear-list/clear-list.component';
+import { FilterGroup } from './filter-dashboard/filter-dashboard.component.pipe';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,9 @@ import { ClearListComponent } from './clear-list/clear-list.component';
     ExcelUploadComponent,
     FilterDashboardComponent,
     SummaryComponent,
-    ClearListComponent
+    ClearListComponent,
+    FilterGroup
+ 
   ],
   imports: [
     BrowserModule,
