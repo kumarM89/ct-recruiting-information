@@ -238,9 +238,30 @@ export class FilterDashboardComponent implements OnInit {
       var obj = {};
       var headCount = 0;
 
+      //Specific Hire Data Row
       obj['rankGroup'] = filter.rankGroup;
       obj['discipline'] = filter.discipline;
       obj['location'] = filter.location;
+      const filtered_specific_Items = this.rowData.filter((v, i) => { return v.RankGroup == filter.rankGroup && v.IOWPRoster == obj['discipline'] && v.CompetencyName == filter.competency && v.Grouping == filter.group && v.WorkLocation == filter.location })
+      for (let actualVal in this.actualUtilOptions) {
+        obj['actualUtil' + actualVal] = ((filtered_specific_Items.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filtered_specific_Items.length) + ((obj['actualUtil' + (parseInt(actualVal) - 1)] || 0) * parseInt(actualVal))) / (parseInt(actualVal) + 1);
+      }
+      for (let projVal in this.projectedUtilOptions) {
+        obj['projUtil' + projVal] = ((filtered_specific_Items.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filtered_specific_Items.length) + ((obj['projUtil' + (parseInt(projVal) - 1)] || 0) * parseInt(projVal))) / (parseInt(projVal) + 1);
+      }
+      obj['fullUtil'] = filtered_specific_Items.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / filtered_specific_Items.length;
+      for (let i = 0; i < filtered_specific_Items.length; i++) {
+        headCount += parseFloat(filtered_specific_Items[i].Headcount);
+      }
+      obj['headcount'] = Math.round(headCount);
+      tableData.push(obj);
+
+      // Discipline Data Row
+      obj = {};
+      headCount = 0;
+      obj['rankGroup'] = filter.rankGroup;
+      obj['discipline'] = filter.discipline;
+      obj['location'] = 'All Locations';
       const filtered_Items = this.rowData.filter((v, i) => { return v.RankGroup == filter.rankGroup && v.IOWPRoster == obj['discipline'] && v.CompetencyName == filter.competency && v.Grouping == filter.group })
       for (let actualVal in this.actualUtilOptions) {
         obj['actualUtil' + actualVal] = ((filtered_Items.map(item => item['Week' + actualVal]).reduce((acc, value) => acc + value, 0) * 100 / filtered_Items.length) + ((obj['actualUtil' + (parseInt(actualVal) - 1)] || 0) * parseInt(actualVal))) / (parseInt(actualVal) + 1);
@@ -249,15 +270,11 @@ export class FilterDashboardComponent implements OnInit {
         obj['projUtil' + projVal] = ((filtered_Items.map(item => item['ForecastedWeek' + projVal]).reduce((acc, value) => acc + value, 0) * 100 / filtered_Items.length) + ((obj['projUtil' + (parseInt(projVal) - 1)] || 0) * parseInt(projVal))) / (parseInt(projVal) + 1);
       }
       obj['fullUtil'] = filtered_Items.map(t => t.Week0).reduce((acc, value) => acc + value, 0) * 100 / filtered_Items.length;
-
-
       for (let i = 0; i < filtered_Items.length; i++) {
         headCount += parseFloat(filtered_Items[i].Headcount);
       }
       obj['headcount'] = Math.round(headCount);
       tableData.push(obj);
-
-
 
       // Discipline Grouping Data Row
       obj = {};
@@ -278,9 +295,7 @@ export class FilterDashboardComponent implements OnInit {
         headCount += parseFloat(filteredItems[i].Headcount);
       }
       obj['headcount'] = Math.round(headCount);
-
       tableData.push(obj);
-
 
       // Competency Data Row
       obj = {};
@@ -302,7 +317,6 @@ export class FilterDashboardComponent implements OnInit {
         headCount += parseFloat(filteredCompetencyItems[i].Headcount);
       }
       obj['headcount'] = Math.round(headCount);
-
       tableData.push(obj);
 
       // All Ranks Data Row
@@ -325,7 +339,6 @@ export class FilterDashboardComponent implements OnInit {
         headCount += parseFloat(filteredRanksItems[i].Headcount);
       }
       obj['headcount'] = Math.round(headCount);
-
       tableData.push(obj);
     });
     return tableData;
@@ -350,11 +363,11 @@ export class FilterDashboardComponent implements OnInit {
           filter.location = params['Location'] || "";
           filter.competency = params['Competency'] || "";
           filter.group = params['Group'] || "";
-
         });
         this.applyFilter(true);
       });
-
+      this.selectedActual = "0";
+      this.selectedProj = "0";
   }
 
 }
